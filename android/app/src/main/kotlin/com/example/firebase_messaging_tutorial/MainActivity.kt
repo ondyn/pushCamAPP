@@ -1,4 +1,4 @@
-package com.example.push_cam_app
+package com.ondyn.push_cam_app
 
 import io.flutter.embedding.android.FlutterActivity
 

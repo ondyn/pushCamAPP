@@ -23,3 +23,19 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Postman
+
+curl --location --request POST 'https://fcm.googleapis.com/fcm/send' \
+--header 'Authorization: Bearer AAA-Q:APAHOuq....IHj94Umgd' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "to": "/topics/messaging",
+  "notification": {
+    "title": "FCM",
+    "body": "messaging tutorial"
+  },
+  "data": {
+    "msgId": "msg_12342"
+  }
+}'
