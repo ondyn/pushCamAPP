@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     messaging = FirebaseMessaging.instance;
-    messaging.subscribeToTopic("messaging");
+    messaging.subscribeToTopic("cam-event");
     messaging.getToken().then((value) {
       print(value);
     });

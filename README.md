@@ -7,9 +7,7 @@ Flutter app
 
 https://petercoding.com/firebase/2021/05/04/using-firebase-cloud-messaging-in-flutter/
 
-
-
-A new Flutter project.
+put google-services.json into /android/app/
 
 ## Getting Started
 
