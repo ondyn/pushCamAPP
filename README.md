@@ -37,3 +37,6 @@ curl --location --request POST 'https://fcm.googleapis.com/fcm/send' \
     "msgId": "msg_12342"
   }
 }'
+
+## generate icons
+flutter pub run flutter_launcher_icons
