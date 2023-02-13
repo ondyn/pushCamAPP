@@ -40,3 +40,8 @@ curl --location --request POST 'https://fcm.googleapis.com/fcm/send' \
 
 ## generate icons
 flutter pub run flutter_launcher_icons
+
+## commands
+flutter run
+flutter clean
+flutter build apk

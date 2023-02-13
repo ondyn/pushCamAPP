@@ -1,5 +1,5 @@
-name: firebase_messaging_tutorial
-description: A new Flutter project.
+name: push_cam_app
+description: Camera events handled app
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -23,7 +23,8 @@ environment:
 dependencies:
   cupertino_icons: ^1.0.2
   firebase_analytics: ^8.3.4
-  firebase_core: ^1.8.0
+  firebase_core: ^1.24.0
+  firebase_database: ^9.1.7
   firebase_messaging: ^10.0.9
   flutter:
     sdk: flutter
@@ -70,9 +71,10 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 flutter_icons:
   image_path: "assets/images/ico128.png"
-  android: "launcher_icon" # can specify file name here e.g. "ic_launcher"
+  android: true # can specify file name here e.g. "ic_launcher"
   ios: false # can specify file name here e.g. "My-Launcher-Icon"
   #adaptive_icon_background: "assets/images/christmas-background.png" # only available for Android 8.0 devices and above
-  adaptive_icon_foreground: "assets/images/ico432.png" # only available for Android 8.0 devices and above
+  #adaptive_icon_foreground: "assets/images/ico432b.png" # only available for Android 8.0 devices and above
+  #adaptive_icon_background: '#000000'
   min_sdk_android: 21 # android min sdk min:16, default 21
   remove_alpha_ios: true

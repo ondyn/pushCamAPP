@@ -1,16 +1,19 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:push_cam_app/InfoDialog.dart';
 
 // callback, will be called when app is in background or terminated state
-Future<void> _messageHandler(RemoteMessage message) async {
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('background message: ${message.notification!.body}');
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_messageHandler);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(MessagingTutorial());
 }
 
@@ -40,20 +43,45 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late FirebaseMessaging messaging;
   String? notificationText;
+
+  Future<void> setupInteractedMessage() async {
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+
+    // If the message also contains a data property with a "type" of "chat",
+    // navigate to a chat screen
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  void _handleMessage(RemoteMessage message) {
+    print('Message clicked!');
+    showDialog(
+        context: context, builder: (context) => InfoDialog(message: message));
+  }
+
   @override
   void initState() {
     super.initState();
     messaging = FirebaseMessaging.instance;
     messaging.subscribeToTopic("cam-event");
+    messaging.subscribeToTopic("cam-status");
     messaging.getToken().then((value) {
       print('messaging token: $value');
     });
 
     // message received when the application in foreground
-    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("message recieved");
-      print(event.notification!.body);
-      print(event.data);
+      print(message.notification!.body);
+      print(message.data);
 
 /*   "notification": {
     "title": "Cam Notification",
@@ -71,31 +99,10 @@ class _MyHomePageState extends State<MyHomePage> {
       "objectType": "2"
   } */
 
-
       showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(event.notification!.title!),
-              content: Wrap(
-                children:[
-                Text(event.notification!.body!),
-                Image.network(event.data["imagePath"]),
-                ]),
-              actions: [
-                TextButton(
-                  child: Text("Ok"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          });
+          context: context, builder: (context) => InfoDialog(message: message));
     });
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      print('Message clicked!');
-    });
+    setupInteractedMessage();
   }
 
   @override
@@ -104,7 +111,35 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title!),
       ),
-      body: Center(child: Text("Messaging Tutorial")),
+      body: Center(
+        child: Column(children: [
+          ElevatedButton(
+            onPressed: () async {
+              // Respond to button press
+              DatabaseReference ref = FirebaseDatabase.instance.ref("users/123");
+
+              await ref.set({
+                "name": "John",
+                "age": 18,
+                "address": {
+                  "line1": "100 Mountain View"
+                }
+              });
+            },
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.redAccent)),
+            child: Text("Arm room"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Respond to button press
+            },
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.greenAccent)),
+            child: Text("Disarm room"),
+          )
+        ]),
+      ),
     );
   }
 }
