@@ -1,8 +1,11 @@
+import 'dart:ffi';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:push_cam_app/InfoDialog.dart';
+import 'firebase_options.dart';
 
 // callback, will be called when app is in background or terminated state
 @pragma('vm:entry-point')
@@ -12,7 +15,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(MessagingTutorial());
 }
@@ -67,6 +72,16 @@ class _MyHomePageState extends State<MyHomePage> {
         context: context, builder: (context) => InfoDialog(message: message));
   }
 
+  Future<void> doArming(bool state, int cameraId) async {
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref("commands/cameras/$cameraId/arm");
+    String time =
+        DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
+
+    //await ref.set({"armedCmd": state, "lastTimeStampUtc": time});
+    await ref.update({"armedCmd": state, "lastTimeStampUtc": time});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -115,24 +130,15 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(children: [
           ElevatedButton(
             onPressed: () async {
-              // Respond to button press
-              DatabaseReference ref = FirebaseDatabase.instance.ref("users/123");
-
-              await ref.set({
-                "name": "John",
-                "age": 18,
-                "address": {
-                  "line1": "100 Mountain View"
-                }
-              });
+              doArming(true, 1);
             },
             style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.redAccent)),
             child: Text("Arm room"),
           ),
           ElevatedButton(
-            onPressed: () {
-              // Respond to button press
+            onPressed: () async {
+              doArming(false, 1);
             },
             style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.greenAccent)),
