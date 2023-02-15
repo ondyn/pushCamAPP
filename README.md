@@ -45,6 +45,7 @@ flutter pub run flutter_launcher_icons
 flutter run
 flutter clean
 flutter build apk
+flutter install
 
 ## init
 npm install -g firebase-tools

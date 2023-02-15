@@ -82,6 +82,17 @@ class _MyHomePageState extends State<MyHomePage> {
     await ref.update({"armedCmd": state, "lastTimeStampUtc": time});
   }
 
+  Future<void> requestImage(int cameraId) async {
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref("commands/cameras/$cameraId/image");
+    String time =
+        DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
+
+    //await ref.set({"armedCmd": state, "lastTimeStampUtc": time});
+    await ref.update({"lastTimeStampUtc": time});
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -143,6 +154,14 @@ class _MyHomePageState extends State<MyHomePage> {
             style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.greenAccent)),
             child: Text("Disarm room"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              requestImage(1);
+            },
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.greenAccent)),
+            child: Text("Request image"),
           )
         ]),
       ),
