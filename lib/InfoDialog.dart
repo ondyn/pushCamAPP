@@ -14,7 +14,7 @@ class InfoDialog extends StatelessWidget {
         detail = Image.network(message.data["imagePath"]);
         break;
       case "/topics/cam-status":
-        detail = Text("Armed: ${message.data["armed"]}");
+        detail = Text(message.data["armed"].toLowerCase() == 'true'?"Armed" : "NOT armed");
         break;
     }
 

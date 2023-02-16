@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -75,8 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> doArming(bool state, int cameraId) async {
     DatabaseReference ref =
         FirebaseDatabase.instance.ref("commands/cameras/$cameraId/arm");
-    String time =
-        DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
+    String time = DateTime.now().millisecondsSinceEpoch.toString();
 
     //await ref.set({"armedCmd": state, "lastTimeStampUtc": time});
     await ref.update({"armedCmd": state, "lastTimeStampUtc": time});
@@ -85,13 +82,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> requestImage(int cameraId) async {
     DatabaseReference ref =
         FirebaseDatabase.instance.ref("commands/cameras/$cameraId/image");
-    String time =
-        DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
+    String time = DateTime.now().millisecondsSinceEpoch.toString();
 
     //await ref.set({"armedCmd": state, "lastTimeStampUtc": time});
     await ref.update({"lastTimeStampUtc": time});
   }
 
+  bool armStatus = true;
 
   @override
   void initState() {
@@ -129,6 +126,15 @@ class _MyHomePageState extends State<MyHomePage> {
           context: context, builder: (context) => InfoDialog(message: message));
     });
     setupInteractedMessage();
+
+    DatabaseReference camStatusRef =
+        FirebaseDatabase.instance.ref('statuses/cameras/1/arm');
+    camStatusRef.onValue.listen((DatabaseEvent event) {
+      final data = event.snapshot.value as Map;
+      setState(() {
+        armStatus = data["armed"];
+      });
+    });
   }
 
   @override
@@ -138,32 +144,64 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title!),
       ),
       body: Center(
-        child: Column(children: [
-          ElevatedButton(
-            onPressed: () async {
-              doArming(true, 1);
-            },
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.redAccent)),
-            child: Text("Arm room"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              doArming(false, 1);
-            },
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.greenAccent)),
-            child: Text("Disarm room"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              requestImage(1);
-            },
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.greenAccent)),
-            child: Text("Request image"),
-          )
-        ]),
+        child: SingleChildScrollView(
+          child: Column(children: [
+            Text(armStatus ? 'Armed' : 'NOT armed',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: armStatus ? Colors.redAccent : Colors.greenAccent,
+                    height: 5,
+                    fontSize: 30)),
+            SizedBox(
+              width: 200,
+              height: 100,
+              child: ElevatedButton(
+                onPressed: () async {
+                  doArming(true, 1);
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.redAccent),
+                ),
+                child: Text("Arm room",
+                    style:
+                        TextStyle(fontSize: 20)),
+              ),
+            ),
+            SizedBox(height: 20),
+            SizedBox(
+              width: 200,
+              height: 100,
+              child: ElevatedButton(
+                onPressed: () async {
+                  doArming(false, 1);
+                },
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(Colors.greenAccent)),
+                child: Text("Disarm room",
+                    style:
+                        TextStyle(fontSize: 20)),
+              ),
+            ),
+            SizedBox(height: 20),
+            SizedBox(
+              width: 200,
+              height: 100,
+              child: ElevatedButton(
+                onPressed: () async {
+                  requestImage(1);
+                },
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(Colors.greenAccent),
+                ),
+                child: Text("Request image",
+                    style:
+                        TextStyle(fontSize: 20)),
+              ),
+            )
+          ]),
+        ),
       ),
     );
   }

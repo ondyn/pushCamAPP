@@ -51,3 +51,6 @@ flutter install
 npm install -g firebase-tools
 firebase login
 
+## hints
+https://github.com/sbis04/flutter-authentication/tree/master/lib
+https://www.kodeco.com/24346128-firebase-realtime-database-tutorial-for-flutter
