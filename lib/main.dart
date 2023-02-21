@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:push_cam_app/InfoDialog.dart';
+import 'package:push_cam_app/signin_page.dart';
 import 'firebase_options.dart';
 
 // callback, will be called when app is in background or terminated state
@@ -46,6 +48,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late FirebaseMessaging messaging;
   String? notificationText;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> setupInteractedMessage() async {
     // Get any messages which caused the application to open from
@@ -90,6 +93,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool armStatus = true;
 
+  Future<void> listenFireBase() async {
+    DatabaseReference camStatusRef =
+        FirebaseDatabase.instance.ref('statuses/cameras/1/arm');
+    camStatusRef.onValue.listen((DatabaseEvent event) {
+      final data = event.snapshot.value as Map;
+      setState(() {
+        armStatus = data["armed"];
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -127,14 +141,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     setupInteractedMessage();
 
-    DatabaseReference camStatusRef =
-        FirebaseDatabase.instance.ref('statuses/cameras/1/arm');
-    camStatusRef.onValue.listen((DatabaseEvent event) {
-      final data = event.snapshot.value as Map;
-      setState(() {
-        armStatus = data["armed"];
-      });
+    _auth.userChanges().listen((event) {
+      debugPrint("doorVerify $event");
+      if (event != null) {
+        listenFireBase();
+      }
     });
+  }
+
+  void _pushPage(BuildContext context, Widget page) {
+    Navigator.of(context) /*!*/ .push(
+      MaterialPageRoute<void>(builder: (_) => page),
+    );
   }
 
   @override
@@ -142,6 +160,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title!),
+        actions: <Widget>[
+          Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () => _pushPage(context, SignInPage()),
+                child: const Icon(Icons.account_circle),
+              )),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -162,9 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(Colors.redAccent),
                 ),
-                child: Text("Arm room",
-                    style:
-                        TextStyle(fontSize: 20)),
+                child: Text("Arm room", style: TextStyle(fontSize: 20)),
               ),
             ),
             SizedBox(height: 20),
@@ -178,9 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: ButtonStyle(
                     backgroundColor:
                         MaterialStateProperty.all(Colors.greenAccent)),
-                child: Text("Disarm room",
-                    style:
-                        TextStyle(fontSize: 20)),
+                child: Text("Disarm room", style: TextStyle(fontSize: 20)),
               ),
             ),
             SizedBox(height: 20),
@@ -195,9 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   backgroundColor:
                       MaterialStateProperty.all(Colors.greenAccent),
                 ),
-                child: Text("Request image",
-                    style:
-                        TextStyle(fontSize: 20)),
+                child: Text("Request image", style: TextStyle(fontSize: 20)),
               ),
             )
           ]),
